@@ -3,10 +3,28 @@ package com.example.dylan.appwithserver;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class SignUpActivity extends AppCompatActivity {
+
+    protected static String EVENT = "signup";
+    protected static String JSON_SUCCESS = "success";
+    protected static String JSON_TEXT = "text";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,14 +32,76 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
     }
 
-    public void sendSignupToServer(View view) {
+    public void verifySignup(View view) {
         //get information from text fields
-        String username = ((EditText)findViewById(R.id.signupUsernameText)).getText().toString();
-        String password = ((EditText)findViewById(R.id.signupPasswordText)).getText().toString();
-        //send to server for verification (ideally encrypted, salt+hash, etc.
+        final String username = ((EditText) findViewById(R.id.signupUsernameText)).getText().toString();
+        final String password = ((EditText) findViewById(R.id.signupPasswordText)).getText().toString();
 
-        //if server comes back with true, start next activity
-        Intent intent = new Intent(this, LogInActivity.class);
-        startActivity(intent);
+        //Verify username/password restrictions.
+        //username: length 4+, characters: alphanumeric+_@.
+        //password: length 7+, characters: no spaces
+        if (!username.matches("^[A-Za-z0-9+@_]{4,}$") && !password.matches("^\\S{7,}$")) {
+            DialogBox dialogBox = new DialogBox();
+            dialogBox.setMessage(R.string.bad_username_and_password);
+            dialogBox.show(getFragmentManager(), "bad_username_and_password");
+            return;
+        }else if (!username.matches("^[A-Za-z0-9+@_]{4,}$")) {
+            DialogBox dialogBox = new DialogBox();
+            dialogBox.setMessage(R.string.bad_username);
+            dialogBox.show(getFragmentManager(), "bad_username");
+            return;
+        }else if (!password.matches("^\\S{7,}$")) {
+            DialogBox dialogBox = new DialogBox();
+            dialogBox.setMessage(R.string.bad_password);
+            dialogBox.show(getFragmentManager(), "bad_password");
+            return;
+        }
+
+
+        //disable button to prevent additional server queries
+        findViewById(R.id.signupButton2).setClickable(false);
+        //setup request to server
+        String url = getResources().getString(R.string.url) + EVENT;
+        RequestQueue queue = Volley.newRequestQueue(this);
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    //authenticate, session id info --> intent***
+                    if (response.getBoolean(JSON_SUCCESS)) {
+                        //Get authentication information and list of strings for next activity***
+                        String string = response.getString(JSON_TEXT);
+
+                        //If server comes back with true, start next activity
+                        Intent intent = new Intent(SignUpActivity.this, AddStringsActivity.class);
+                        //Add extra info***
+                        startActivity(intent);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //enable button
+                findViewById(R.id.signupButton2).setClickable(true);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("VolleyError ", error.toString());
+                //make dialog box
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                //Authenticate and send input string
+                params.put("event", EVENT);
+                params.put("username", username);
+                params.put("password", password);
+                return params;
+            }
+        };
+        //queue up the request to the server
+        queue.add(jsonRequest);
     }
 }

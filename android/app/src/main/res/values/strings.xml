@@ -5,4 +5,11 @@
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
     <string name="add_string_button">Add</string>
+    <string name="dialog_ok">Ok!!</string>
+    <string name="illegal_character">Illegal character. Please use only letters, numbers and underscores.</string>
+    <string name="short_login">Please enter a valid username.</string>
+    <string name="url">http://192.168.1.194:3000/</string>
+    <string name="bad_username">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+</string>
+    <string name="bad_password">Password must be 7 characters or more and cannot contain spaces.</string>
+    <string name="bad_username_and_password">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+\n\nPassword must be 7 characters or more and cannot contain spaces.</string>
 </resources>

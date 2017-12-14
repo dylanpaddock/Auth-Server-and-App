@@ -1,10 +1,9 @@
 package com.example.dylan.appwithserver;
 
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -13,16 +12,20 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.io.IOException;
-import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.String;
 
 public class AddStringsActivity extends AppCompatActivity {
-    private int current = 0; // where to place the next string
+
+    protected static String EVENT = "login";
+    protected static String JSON_TEXT = "text";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,41 +33,58 @@ public class AddStringsActivity extends AppCompatActivity {
 
     }
 
-    public void addString(String s) {
+    public void addString(View view) {
+        //Get text from the EditText and store it.
+        EditText editText = (EditText)findViewById(R.id.stringToAdd);
+        String string = editText.getText().toString();
+        //If the EditText is empty, do nothing.
+        if (string.isEmpty()) {
+            return;
+        }else
+        //if text has illegal characters, spawn dialog box
+        if (!string.matches("^[a-zA-Z0-9_ ]+$")) {
+            //DialogBox dialogBox = new DialogBox();
+            //dialogBox.setMessage(R.string.illegal_character);
+        }
 
-        //set button unclickable
+        //disable button to prevent additional server queries
         findViewById(R.id.addStringsButton).setClickable(false);
+        //remove text from EditText
+        editText.setText("", TextView.BufferType.EDITABLE);
 
-        //send request for new list to server
-        String url = "192.222.217.226:3000/";
+        //setup request to server
+        String url = getResources().getString(R.string.url)+ EVENT;
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url,
-            new Response.Listener<String>() {
+        JsonObjectRequest stringRequest = new JsonObjectRequest
+                (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
                 @Override
-                public void onResponse(String response) {
-                    //check for bad response, else display***
-
-                    TextView t = (TextView)findViewById(R.id.textView);
-                    t.setText(response);
-                    //set button clickable
+                public void onResponse(JSONObject response){
+                    TextView t = (TextView) findViewById(R.id.textView);
+                    try {
+                        t.setText(response.getString(JSON_TEXT));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    //enable button
                     findViewById(R.id.addStringsButton).setClickable(true);
                 }
-            }, new onErrorResponse(VolleyError error) {
-                Log.d("", error.toString());
-            }
-    })
+            }, new Response.ErrorListener() {
                 @Override
-                    protected Map<String String> getParams() {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("","");
-                        return params;
-                    }
-                };
-                //
-
-            //
-        });
+                public void onErrorResponse(VolleyError error) {
+                Log.d("VolleyError ", error.toString());
+                //make dialog box
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                //Authenticate and send input string
+                params.put("event", EVENT);
+                params.put("", "");//authentication information***
+                return params;
+            }
+        };
         queue.add(stringRequest);
     }
 
-}-
+}
