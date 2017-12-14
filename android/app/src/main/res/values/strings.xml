@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">App with Server</string>
+    <string name="login_button">Log In</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="add_string_button">Add</string>
+</resources>
