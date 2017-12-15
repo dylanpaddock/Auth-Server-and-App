@@ -24,7 +24,7 @@ import java.lang.String;
 public class AddStringsActivity extends AppCompatActivity {
 
     protected static String EVENT = "login";
-    protected static String JSON_TEXT = "text";
+    protected static String JSON_TEXT = "strings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,7 @@ public class AddStringsActivity extends AppCompatActivity {
     public void addString(View view) {
         //Get text from the EditText and store it.
         EditText editText = (EditText)findViewById(R.id.stringToAdd);
-        String string = editText.getText().toString();
+        final String string = editText.getText().toString();
         //If the EditText is empty, do nothing.
         if (string.isEmpty()) {
             return;
@@ -46,7 +46,7 @@ public class AddStringsActivity extends AppCompatActivity {
             //DialogBox dialogBox = new DialogBox();
             //dialogBox.setMessage(R.string.illegal_character);
         }
-
+        final String token = ""; //TODO get info from intent
         //disable button to prevent additional server queries
         findViewById(R.id.addStringsButton).setClickable(false);
         //remove text from EditText
@@ -59,6 +59,8 @@ public class AddStringsActivity extends AppCompatActivity {
                 (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response){
+                    //TODO get token -> authenticate, check for success/uniqueness, dialog box if not
+                    //TODO
                     TextView t = (TextView) findViewById(R.id.textView);
                     try {
                         t.setText(response.getString(JSON_TEXT));
@@ -72,7 +74,9 @@ public class AddStringsActivity extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                 Log.d("VolleyError ", error.toString());
-                //make dialog box
+                DialogBox dialogBox = new DialogBox();
+                dialogBox.setMessage(R.string.bad_password);
+                dialogBox.show(getFragmentManager(), "bad_password");
             }
         }) {
             @Override
@@ -80,7 +84,8 @@ public class AddStringsActivity extends AppCompatActivity {
                 Map<String, String> params = new HashMap<>();
                 //Authenticate and send input string
                 params.put("event", EVENT);
-                params.put("", "");//authentication information***
+                params.put("token", token);//authentication information***
+                params.put("text", string);
                 return params;
             }
         };

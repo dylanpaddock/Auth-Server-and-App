@@ -12,10 +12,14 @@ import android.support.v4.app.FragmentManager;
  */
 
 public class DialogBox extends DialogFragment {
-    protected int message;
+    protected String message;
 
-    public void setMessage(int message) {
+    public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setMessage(int messageId) {
+        this.message = getString(messageId);
     }
 
     @Override

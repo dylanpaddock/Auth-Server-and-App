@@ -24,7 +24,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     protected static String EVENT = "signup";
     protected static String JSON_SUCCESS = "success";
-    protected static String JSON_TEXT = "text";
+    protected static String JSON_TEXT = "strings";
+    protected static String AUTH_TOKEN = "token";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +69,17 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 try {
-                    //authenticate, session id info --> intent***
                     if (response.getBoolean(JSON_SUCCESS)) {
-                        //Get authentication information and list of strings for next activity***
-                        String string = response.getString(JSON_TEXT);
-
+                        //Get authentication information and list of strings for next activity
                         //If server comes back with true, start next activity
                         Intent intent = new Intent(SignUpActivity.this, AddStringsActivity.class);
-                        //Add extra info***
+                        intent.putExtra("token", response.getString(AUTH_TOKEN));
+                        intent.putExtra("strings", response.getString(JSON_TEXT));
                         startActivity(intent);
+                    }else{
+                        DialogBox dialogBox = new DialogBox();
+                        dialogBox.setMessage(R.string.username_exists);
+                        dialogBox.show(getFragmentManager(), "username_exists");
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -88,7 +91,9 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d("VolleyError ", error.toString());
-                //make dialog box
+                DialogBox dialogBox = new DialogBox();
+                dialogBox.setMessage(error.toString());
+                dialogBox.show(getFragmentManager(), "volley_error");
             }
         }) {
             @Override

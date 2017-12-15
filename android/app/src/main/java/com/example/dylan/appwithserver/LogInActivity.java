@@ -24,7 +24,9 @@ public class LogInActivity extends AppCompatActivity {
 
     protected static String EVENT = "login";
     protected static String JSON_SUCCESS = "success";
-
+    protected static String AUTH_TOKEN = "token";
+    protected static String JSON_MESSAGE = "message";
+    protected static String JSON_TEXT = "strings";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +44,7 @@ public class LogInActivity extends AppCompatActivity {
             dialogBox.show(getFragmentManager(), "short_login");
             return;
         }
-        //send to server for verification (ideally encrypted, salt+hash, etc.
+        //send to server for verification (ideally encrypted, salt+hash, etc.)
 
         //disable button to prevent additional server queries
         findViewById(R.id.loginButton2).setClickable(false);
@@ -58,9 +60,16 @@ public class LogInActivity extends AppCompatActivity {
                             Log.d("server response: ", response.toString());
                             //authenticate, session id info --> intent***
                             if (response.getBoolean(JSON_SUCCESS)) {
-                                //if server comes back with true, start next activity
+                                //successfully logged in. Start new activity and pass auth token.
                                 Intent intent = new Intent(LogInActivity.this, AddStringsActivity.class);
+                                intent.putExtra("token", response.getString(AUTH_TOKEN));
+                                intent.putExtra("strings", response.getString(JSON_TEXT));
+
                                 startActivity(intent);
+                            }else{//login failed. Dialog box to report failure
+                                DialogBox dialogBox = new DialogBox();
+                                dialogBox.setMessage(response.getString(JSON_MESSAGE));
+                                dialogBox.show(getFragmentManager(), "bad_login");
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -72,7 +81,9 @@ public class LogInActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("VolleyError ", error.toString());
-                        //make dialog box
+                        DialogBox dialogBox = new DialogBox();
+                        dialogBox.setMessage(error.getMessage());
+                        dialogBox.show(getFragmentManager(), "volley_error");
                     }
                 }) {
             @Override

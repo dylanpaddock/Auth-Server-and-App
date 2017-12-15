@@ -12,4 +12,5 @@
     <string name="bad_username">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+</string>
     <string name="bad_password">Password must be 7 characters or more and cannot contain spaces.</string>
     <string name="bad_username_and_password">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+\n\nPassword must be 7 characters or more and cannot contain spaces.</string>
+    <string name="username_exists">This username already exists.</string>
 </resources>
