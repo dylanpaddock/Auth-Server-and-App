@@ -8,7 +8,7 @@
     <string name="dialog_ok">Ok!!</string>
     <string name="illegal_character">Illegal character. Please use only letters, numbers and underscores.</string>
     <string name="short_login">Please enter a valid username and password.</string>
-    <string name="url">http://dylan.localtunnel.me/</string>
+    <string name="url">http://d9d92578.ngrok.io/</string>
     <string name="bad_username">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+</string>
     <string name="bad_password">Password must be 7 characters or more and cannot contain spaces.</string>
     <string name="bad_username_and_password">Username must be 4 characters or more and must use alphanumeric characters or the symbols _.@+\n\nPassword must be 7 characters or more and cannot contain spaces.</string>
