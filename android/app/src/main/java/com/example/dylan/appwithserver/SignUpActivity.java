@@ -11,7 +11,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -24,8 +24,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     protected static String EVENT = "signup";
     protected static String JSON_SUCCESS = "success";
-    protected static String JSON_TEXT = "strings";
     protected static String AUTH_TOKEN = "token";
+    protected static String JSON_TEXT = "strings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,17 +64,19 @@ public class SignUpActivity extends AppCompatActivity {
         //setup request to server
         String url = getResources().getString(R.string.url) + EVENT;
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(
-                Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, url, new Response.Listener<String>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(String response) {
                 try {
-                    if (response.getBoolean(JSON_SUCCESS)) {
+                    Log.d("server response: ", response);
+                    JSONObject j = new JSONObject(response);
+                    if (j.getBoolean(JSON_SUCCESS)) {
                         //Get authentication information and list of strings for next activity
                         //If server comes back with true, start next activity
                         Intent intent = new Intent(SignUpActivity.this, AddStringsActivity.class);
-                        intent.putExtra("token", response.getString(AUTH_TOKEN));
-                        intent.putExtra("strings", response.getString(JSON_TEXT));
+                        intent.putExtra("token", j.getString(AUTH_TOKEN));
+                        intent.putExtra("strings", j.getString(JSON_TEXT));
                         startActivity(intent);
                     }else{
                         DialogBox dialogBox = new DialogBox();
@@ -90,10 +92,10 @@ public class SignUpActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("VolleyError ", error.toString());
                 DialogBox dialogBox = new DialogBox();
-                dialogBox.setMessage(error.toString());
+                dialogBox.setMessage(R.string.volley_error);
                 dialogBox.show(getFragmentManager(), "volley_error");
+                findViewById(R.id.signupButton2).setClickable(true);
             }
         }) {
             @Override
@@ -107,6 +109,6 @@ public class SignUpActivity extends AppCompatActivity {
             }
         };
         //queue up the request to the server
-        queue.add(jsonRequest);
+        queue.add(stringRequest);
     }
 }
